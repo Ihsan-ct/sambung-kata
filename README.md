@@ -1,1 +1,1 @@
-# sazaraaax-script
+# naka-script
