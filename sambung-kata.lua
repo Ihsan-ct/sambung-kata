@@ -110,10 +110,7 @@ local config = {
     maxDelay = 750,
     aggression = 20,
     minLength = 3,
-    maxLength = 12,
-    
-    ultraForceSuffix = true,
-    forcedSuffixes = {"if","x"}
+    maxLength = 12
 }
 
 -- =========================
@@ -160,36 +157,6 @@ local function getSmartWords(prefix)
         end
     end
 
-    local function pickUltraForcedWord(words)
-
-    if not config.ultraForceSuffix then
-        return words[1]
-    end
-
-    local forcedList = {}
-
-    for _, word in ipairs(words) do
-        for _, suffix in ipairs(config.forcedSuffixes) do
-            if string.sub(word, -string.len(suffix)) == suffix then
-                table.insert(forcedList, word)
-                break
-            end
-        end
-    end
-
-    if #forcedList > 0 then
-        -- tetap prioritaskan yang paling panjang
-        table.sort(forcedList, function(a,b)
-            return string.len(a) > string.len(b)
-        end)
-
-        return forcedList[1]
-    end
-
-    -- fallback kalau tidak ada suffix target
-    return words[1]
-end
-
     table.sort(results, function(a,b)
         return string.len(a) > string.len(b)
     end)
@@ -227,7 +194,14 @@ local function startUltraAI()
         return
     end
 
-local selectedWord = pickUltraForcedWord(words)
+    local selectedWord = words[1]
+
+    if config.aggression < 100 then
+        local topN = math.floor(#words * (1 - config.aggression/100))
+        if topN < 1 then topN = 1 end
+        if topN > #words then topN = #words end
+        selectedWord = words[math.random(1, topN)]
+    end
 
     local currentWord = serverLetter
     local remain = string.sub(selectedWord, #serverLetter + 1)
@@ -262,16 +236,43 @@ end
 -- UI
 -- =========================
 local Window = Rayfield:CreateWindow({
-    Name = "Sambung-kata",
-    LoadingTitle = "Loading Gui...",
-    LoadingSubtitle = "automate by naka",
-    ConfigurationSaving = {Enabled = false}
+    Name = "⚡ NAKA ULTRA AUTO KATA ⚡",
+    LoadingTitle = "NAKA AI Engine",
+    LoadingSubtitle = "Ultra Smart Automation System",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "NAKA-AI",
+        FileName = "AutoKataConfig"
+    },
+    Discord = {
+        Enabled = false
+    },
+    KeySystem = false
 })
 
-local MainTab = Window:CreateTab("Main")
+Rayfield:LoadConfiguration()
+
+Rayfield:Notify({
+    Title = "NAKA AI",
+    Content = "GUI Loaded Successfully!",
+    Duration = 4,
+    Image = 4483362458
+})
+
+-- =========================
+-- MAIN TAB (UPGRADED UI)
+-- =========================
+
+local MainTab = Window:CreateTab("⚔ MAIN CONTROL", 4483362458)
+
+-- =========================
+-- AUTO ENGINE SECTION
+-- =========================
+
+MainTab:CreateSection("🤖 AUTO ENGINE")
 
 MainTab:CreateToggle({
-    Name = "Auto type",
+    Name = "🔥 Enable Ultra Auto Type",
     CurrentValue = false,
     Callback = function(Value)
         autoEnabled = Value
@@ -281,37 +282,25 @@ MainTab:CreateToggle({
     end
 })
 
+-- =========================
+-- AI BEHAVIOR SECTION
+-- =========================
+
+MainTab:CreateSection("🧠 AI BEHAVIOR")
+
 MainTab:CreateSlider({
-    Name = "Aggression/tingkat",
+    Name = "⚡ Aggression Level",
     Range = {0,100},
     Increment = 5,
     CurrentValue = config.aggression,
     Callback = function(Value)
-        config.aggression = Value
-    end
-})
-MainTab:CreateSlider({
-    Name = "Min Delay (ms)",
-    Range = {10, 500},
-    Increment = 5,
-    CurrentValue = config.minDelay,
-    Callback = function(Value)
-        config.minDelay = Value
+        config.agression = Value
     end
 })
 
 MainTab:CreateSlider({
-    Name = "Max Delay (ms)",
-    Range = {100, 1000},
-    Increment = 5,
-    CurrentValue = config.maxDelay,
-    Callback = function(Value)
-        config.maxDelay = Value
-    end
-})
-MainTab:CreateSlider({
-    Name = "Min Word Length",
-    Range = {1, 2},
+    Name = "🔤 Min Word Length",
+    Range = {2, 5},
     Increment = 1,
     CurrentValue = config.minLength,
     Callback = function(Value)
@@ -320,7 +309,7 @@ MainTab:CreateSlider({
 })
 
 MainTab:CreateSlider({
-    Name = "Max Word Length",
+    Name = "🔠 Max Word Length",
     Range = {5, 20},
     Increment = 1,
     CurrentValue = config.maxLength,
@@ -329,101 +318,160 @@ MainTab:CreateSlider({
     end
 })
 
+-- =========================
+-- HUMAN SIMULATION SECTION
+-- =========================
+
+MainTab:CreateSection("⏱ HUMAN SIMULATION")
+
+MainTab:CreateSlider({
+    Name = "⌛ Min Delay (ms)",
+    Range = {50, 500},
+    Increment = 10,
+    CurrentValue = config.minDelay,
+    Callback = function(Value)
+        config.minDelay = Value
+    end
+})
+
+MainTab:CreateSlider({
+    Name = "⏳ Max Delay (ms)",
+    Range = {100, 1000},
+    Increment = 10,
+    CurrentValue = config.maxDelay,
+    Callback = function(Value)
+        config.maxDelay = Value
+    end
+})-- =========================
+-- MATCH INFO SECTION
+-- =========================
+
+MainTab:CreateSection("📊 MATCH INFORMATION")
+
 usedWordsDropdown = MainTab:CreateDropdown({
-    Name = "Used Words",
+    Name = "📚 Used Words History",
     Options = usedWordsList,
-    CurrentOption = "",
+    CurrentOption = {},
+    MultipleOptions = false,
     Callback = function() end
 })
--- ==============================
--- PARAGRAPH OBJECTS
--- ==============================
+
+-- =========================
+-- LIVE STATUS SECTION
+-- =========================
+
+MainTab:CreateSection("🎮 LIVE STATUS")
+
 local opponentParagraph = MainTab:CreateParagraph({
-    Title = "Status Opponent",
-    Content = "Menunggu..."
+    Title = "👤 Opponent Status",
+    Content = "⏳ Waiting for match..."
 })
 
 local startLetterParagraph = MainTab:CreateParagraph({
-    Title = "Kata Start",
-    Content = "-"
+    Title = "🔤 Current Start Letter",
+    Content = "—"
 })
-
 -- ==============================
--- SAFE UPDATE FUNCTIONS
+-- SAFE UPDATE FUNCTIONS (UPGRADED)
 -- ==============================
 
 local function updateOpponentStatus()
 
-    local content = ""
+    local content
 
-    if matchActive == true then
+    if matchActive then
 
-        if isMyTurn == true then
-            content = "Giliran Anda"
+        if isMyTurn then
+            content = "🟢 Giliran Anda"
         else
-
-            if opponentStreamWord ~= nil and opponentStreamWord ~= "" then
-                content = "Opponent mengetik: " .. tostring(opponentStreamWord)
+            if opponentStreamWord and opponentStreamWord ~= "" then
+                content = "🟡 Opponent mengetik: " .. tostring(opponentStreamWord)
             else
-                content = "Giliran Opponent"
+                content = "🔴 Giliran Opponent"
             end
-
         end
 
     else
-        content = "Match tidak aktif"
+        content = "⚫ Match tidak aktif"
     end
 
-    local data = {}
-    data.Title = "Status Opponent"
-    data.Content = tostring(content)
-
-    opponentParagraph.Set(opponentParagraph, data)
+    opponentParagraph:Set({
+        Title = "👤 Status Opponent",
+        Content = content
+    })
 end
-
+-- ==============================
+-- UPDATE START LETTER (UPGRADED)
+-- ==============================
 
 local function updateStartLetter()
 
-    local content = ""
+    local content
 
-    if serverLetter ~= nil and serverLetter ~= "" then
-        content = "Kata Start: " .. tostring(serverLetter)
+    if serverLetter and serverLetter ~= "" then
+        content = "🔤 Start Letter:  " .. tostring(serverLetter)
     else
-        content = "Kata Start: -"
+        content = "🔤 Start Letter:  —"
     end
 
-    local data = {}
-    data.Title = "Kata Start"
-    data.Content = tostring(content)
-
-    startLetterParagraph.Set(startLetterParagraph, data)
+    startLetterParagraph:Set({
+        Title = "🎯 Kata Awal",
+        Content = content
+    })
 end
-
 -- ==============================
--- TAB ABOUT (SAFE BUILD)
+-- ABOUT TAB (PREMIUM VERSION)
 -- ==============================
-local AboutTab = Window:CreateTab("About")
 
-local about1 = {}
-about1.Title = "Informasi Script"
-about1.Content = "Auto Kata\nVersi: 2.0\nby sazaraaax\nFitur: Auto play dengan wordlist Indonesia\n\nthanks to danzzy1we for the indonesian dictionary"
-AboutTab:CreateParagraph(about1)
+local AboutTab = Window:CreateTab("💎 ABOUT NAKA", 4483362458)
 
-local about2 = {}
-about2.Title = "Informasi Update"
-about2.Content = "> stable on all device pc or android\n > Fixing gui not showing"
-AboutTab:CreateParagraph(about2)
+AboutTab:CreateSection("📜 SCRIPT INFORMATION")
 
-local about3 = {}
-about3.Title = "Cara Penggunaan"
-about3.Content = "1. Aktifkan toggle Auto\n2. Atur delay dan agresivitas\n3. Mulai permainan\n4. Script akan otomatis menjawab"
-AboutTab:CreateParagraph(about3)
+AboutTab:CreateParagraph({
+    Title = "⚡ NAKA ULTRA AUTO KATA",
+    Content =
+        "Versi : 2.0\n" ..
+        "Developer : NAKA\n\n" ..
+        "Fitur Utama:\n" ..
+        "• Auto Play AI\n" ..
+        "• Smart Word Filtering\n" ..
+        "• Human Delay Simulation\n" ..
+        "• Aggression Control\n\n" ..
+        "Dictionary credit: danzzy1we"
+})
 
-local about4 = {}
-about4.Title = "Catatan"
-about4.Content = "Pastikan koneksi stabil\nJika ada error, coba reload"
-AboutTab:CreateParagraph(about4)
+AboutTab:CreateSection("🆕 UPDATE LOG")
 
+AboutTab:CreateParagraph({
+    Title = "🔥 Latest Improvements",
+    Content =
+        "• Stabil di PC & Android\n" ..
+        "• Fix GUI tidak muncul\n" ..
+        "• Performa AI lebih cepat\n" ..
+        "• Optimasi Anti Error"
+})
+
+AboutTab:CreateSection("📖 HOW TO USE")
+
+AboutTab:CreateParagraph({
+    Title = "🎮 Cara Menggunakan",
+    Content =
+        "1️⃣ Aktifkan 'Enable Ultra Auto Type'\n" ..
+        "2️⃣ Atur Aggression & Delay\n" ..
+        "3️⃣ Masuk ke Match\n" ..
+        "4️⃣ AI akan otomatis bermain"
+})
+
+AboutTab:CreateSection("⚠ IMPORTANT NOTES")
+
+AboutTab:CreateParagraph({
+    Title = "🛑 Catatan Penting",
+    Content =
+        "• Pastikan koneksi stabil\n" ..
+        "• Jangan spam toggle\n" ..
+        "• Jika error, reload script\n" ..
+        "• Gunakan dengan bijak"
+})
 -- =========================
 -- REMOTE EVENTS (NO INLINE)
 -- =========================
