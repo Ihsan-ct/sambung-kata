@@ -1,3 +1,7 @@
+-- =========================================================
+-- ULTRA SMART AUTO KATA (ANTI LUAOBFUSCATOR V1 BUILD)
+-- =========================================================
+
 if game:IsLoaded() == false then
     game.Loaded:Wait()
 end
@@ -381,9 +385,9 @@ local function updateOpponentStatus()
             content = "🟢 Giliran Anda"
         else
             if opponentStreamWord and opponentStreamWord ~= "" then
-                content = "🟡 Lawan mengetik: " .. tostring(opponentStreamWord)
+                content = "🟡 Opponent mengetik: " .. tostring(opponentStreamWord)
             else
-                content = "🔴 Giliran Lawan"
+                content = "🔴 Giliran Opponent"
             end
         end
 
@@ -518,4 +522,4 @@ MatchUI.OnClientEvent:Connect(onMatchUI)
 BillboardUpdate.OnClientEvent:Connect(onBillboard)
 UsedWordWarn.OnClientEvent:Connect(onUsedWarn)
 
-print("NAKA BUILD LOADED SUCCESSFULLY")
+print("ANTI LUAOBFUSCATOR BUILD LOADED SUCCESSFULLY")
