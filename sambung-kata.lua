@@ -97,7 +97,6 @@ local UsedWordWarn = remotes:WaitForChild("UsedWordWarn")
 local matchActive = false
 local isMyTurn = false
 local serverLetter = ""
-local totalWordsPlayed = 0
 
 local usedWords = {}
 local usedWordsList = {}
@@ -125,16 +124,12 @@ local usedWordsDropdown = nil
 
 local function addUsedWord(word)
     local w = string.lower(word)
-    if not usedWords[w] then
+    if usedWords[w] == nil then
         usedWords[w] = true
         table.insert(usedWordsList, word)
-        totalWordsPlayed += 1
-
-        if usedWordsDropdown then
+        if usedWordsDropdown ~= nil then
             usedWordsDropdown:Set(usedWordsList)
         end
-
-        updateStats()
     end
 end
 
@@ -241,13 +236,16 @@ end
 -- UI
 -- =========================
 local Window = Rayfield:CreateWindow({
-    Name = "NAKA AI • Auto Kata",
+    Name = "⚡ NAKA ULTRA AUTO KATA ⚡",
     LoadingTitle = "NAKA AI Engine",
-    LoadingSubtitle = "Smart Automation System",
+    LoadingSubtitle = "Ultra Smart Automation System",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "NAKA-AI",
         FileName = "AutoKataConfig"
+    },
+    Discord = {
+        Enabled = false
     },
     KeySystem = false
 })
@@ -256,8 +254,9 @@ Rayfield:LoadConfiguration()
 
 Rayfield:Notify({
     Title = "NAKA AI",
-    Content = "System Loaded Successfully",
-    Duration = 4
+    Content = "GUI Loaded Successfully!",
+    Duration = 4,
+    Image = 4483362458
 })
 
 -- =========================
@@ -266,11 +265,14 @@ Rayfield:Notify({
 
 local MainTab = Window:CreateTab("⚔ MAIN CONTROL", 4483362458)
 
--- AUTO ENGINE
+-- =========================
+-- AUTO ENGINE SECTION
+-- =========================
+
 MainTab:CreateSection("🤖 AUTO ENGINE")
 
 MainTab:CreateToggle({
-    Name = "Enable Auto AI",
+    Name = "🔥 Enable Ultra Auto Type",
     CurrentValue = false,
     Callback = function(Value)
         autoEnabled = Value
@@ -280,22 +282,24 @@ MainTab:CreateToggle({
     end
 })
 
--- AI SETTINGS
-MainTab:CreateSection("🧠 AI SETTINGS")
+-- =========================
+-- AI BEHAVIOR SECTION
+-- =========================
+
+MainTab:CreateSection("🧠 AI BEHAVIOR")
 
 MainTab:CreateSlider({
-    Name = "Aggression Level",
+    Name = "⚡ Aggression Level",
     Range = {0,100},
     Increment = 5,
     CurrentValue = config.aggression,
     Callback = function(Value)
-        config.aggression = Value
-        updateAIMode()
+        config.agression = Value
     end
 })
 
 MainTab:CreateSlider({
-    Name = "Min Word Length",
+    Name = "🔤 Min Word Length",
     Range = {2, 5},
     Increment = 1,
     CurrentValue = config.minLength,
@@ -305,7 +309,7 @@ MainTab:CreateSlider({
 })
 
 MainTab:CreateSlider({
-    Name = "Max Word Length",
+    Name = "🔠 Max Word Length",
     Range = {5, 20},
     Increment = 1,
     CurrentValue = config.maxLength,
@@ -314,11 +318,14 @@ MainTab:CreateSlider({
     end
 })
 
--- HUMAN SIMULATION
+-- =========================
+-- HUMAN SIMULATION SECTION
+-- =========================
+
 MainTab:CreateSection("⏱ HUMAN SIMULATION")
 
 MainTab:CreateSlider({
-    Name = "Min Delay (ms)",
+    Name = "⌛ Min Delay (ms)",
     Range = {50, 500},
     Increment = 10,
     CurrentValue = config.minDelay,
@@ -328,75 +335,42 @@ MainTab:CreateSlider({
 })
 
 MainTab:CreateSlider({
-    Name = "Max Delay (ms)",
+    Name = "⏳ Max Delay (ms)",
     Range = {100, 1000},
     Increment = 10,
     CurrentValue = config.maxDelay,
     Callback = function(Value)
         config.maxDelay = Value
     end
-})
+})-- =========================
+-- MATCH INFO SECTION
+-- =========================
 
--- MATCH INFO
 MainTab:CreateSection("📊 MATCH INFORMATION")
 
 usedWordsDropdown = MainTab:CreateDropdown({
-    Name = "Used Words",
+    Name = "📚 Used Words History",
     Options = usedWordsList,
     CurrentOption = {},
     MultipleOptions = false,
     Callback = function() end
 })
 
--- LIVE STATUS
+-- =========================
+-- LIVE STATUS SECTION
+-- =========================
+
 MainTab:CreateSection("🎮 LIVE STATUS")
 
 local opponentParagraph = MainTab:CreateParagraph({
-    Title = "Opponent Status",
-    Content = "Waiting..."
+    Title = "👤 Opponent Status",
+    Content = "⏳ Waiting for match..."
 })
 
 local startLetterParagraph = MainTab:CreateParagraph({
-    Title = "Start Letter",
-    Content = "-"
+    Title = "🔤 Current Start Letter",
+    Content = "—"
 })
-
--- STATS
-MainTab:CreateSection("📈 STATISTICS")
-
-local statsParagraph = MainTab:CreateParagraph({
-    Title = "Match Stats",
-    Content = "Words Played: 0"
-})
-
--- AI MODE
-local aiModeParagraph = MainTab:CreateParagraph({
-    Title = "AI Behavior",
-    Content = "Balanced"
-})
-function updateStats()
-    statsParagraph:Set({
-        Title = "Match Stats",
-        Content = "Words Played: " .. tostring(totalWordsPlayed)
-    })
-end
-
-function updateAIMode()
-    local mode
-
-    if config.aggression >= 70 then
-        mode = "Aggressive"
-    elseif config.aggression >= 30 then
-        mode = "Balanced"
-    else
-        mode = "Safe"
-    end
-
-    aiModeParagraph:Set({
-        Title = "AI Behavior",
-        Content = mode
-    })
-end
 -- ==============================
 -- SAFE UPDATE FUNCTIONS (UPGRADED)
 -- ==============================
@@ -547,13 +521,5 @@ end
 MatchUI.OnClientEvent:Connect(onMatchUI)
 BillboardUpdate.OnClientEvent:Connect(onBillboard)
 UsedWordWarn.OnClientEvent:Connect(onUsedWarn)
-
-task.spawn(function()
-    while true do
-        updateOpponentStatus()
-        updateStartLetter()
-        task.wait(0.2)
-    end
-end)
 
 print("ANTI LUAOBFUSCATOR BUILD LOADED SUCCESSFULLY")
