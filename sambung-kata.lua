@@ -110,7 +110,10 @@ local config = {
     maxDelay = 750,
     aggression = 20,
     minLength = 3,
-    maxLength = 12
+    maxLength = 12,
+    
+    ultraForceSuffix = true,
+    forcedSuffixes = {"if","x"}
 }
 
 -- =========================
@@ -157,6 +160,36 @@ local function getSmartWords(prefix)
         end
     end
 
+    local function pickUltraForcedWord(words)
+
+    if not config.ultraForceSuffix then
+        return words[1]
+    end
+
+    local forcedList = {}
+
+    for _, word in ipairs(words) do
+        for _, suffix in ipairs(config.forcedSuffixes) do
+            if string.sub(word, -string.len(suffix)) == suffix then
+                table.insert(forcedList, word)
+                break
+            end
+        end
+    end
+
+    if #forcedList > 0 then
+        -- tetap prioritaskan yang paling panjang
+        table.sort(forcedList, function(a,b)
+            return string.len(a) > string.len(b)
+        end)
+
+        return forcedList[1]
+    end
+
+    -- fallback kalau tidak ada suffix target
+    return words[1]
+end
+
     table.sort(results, function(a,b)
         return string.len(a) > string.len(b)
     end)
@@ -194,14 +227,7 @@ local function startUltraAI()
         return
     end
 
-    local selectedWord = words[1]
-
-    if config.aggression < 100 then
-        local topN = math.floor(#words * (1 - config.aggression/100))
-        if topN < 1 then topN = 1 end
-        if topN > #words then topN = #words end
-        selectedWord = words[math.random(1, topN)]
-    end
+local selectedWord = pickUltraForcedWord(words)
 
     local currentWord = serverLetter
     local remain = string.sub(selectedWord, #serverLetter + 1)
