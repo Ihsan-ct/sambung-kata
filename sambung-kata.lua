@@ -237,11 +237,11 @@ end
 -- =========================
 local Window = Rayfield:CreateWindow({
     Name = "⚡ NAKA ULTRA AUTO KATA ⚡",
-    LoadingTitle = "NAKA Engine",
+    LoadingTitle = "NAKA AI Engine",
     LoadingSubtitle = "Ultra Smart Automation System",
     ConfigurationSaving = {
         Enabled = true,
-        FolderName = "NAKA",
+        FolderName = "NAKA-AI",
         FileName = "AutoKataConfig"
     },
     Discord = {
@@ -253,7 +253,7 @@ local Window = Rayfield:CreateWindow({
 Rayfield:LoadConfiguration()
 
 Rayfield:Notify({
-    Title = "NAKA",
+    Title = "NAKA AI",
     Content = "GUI Loaded Successfully!",
     Duration = 4,
     Image = 4483362458
@@ -294,7 +294,7 @@ MainTab:CreateSlider({
     Increment = 5,
     CurrentValue = config.aggression,
     Callback = function(Value)
-    config.agression = Value
+        config.agression = Value
     end
 })
 
