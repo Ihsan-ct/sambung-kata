@@ -246,8 +246,7 @@ local Window = Rayfield:CreateWindow({
     KeySystem = false
 })
 
-Rayfield:SetTheme("DarkBlue") -- set theme dulu
-Rayfield:LoadConfiguration()  -- baru load config
+Rayfield:LoadConfiguration()
 
 Rayfield:Notify({
     Title = "NAKA",
