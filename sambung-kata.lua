@@ -1,7 +1,3 @@
--- =========================================================
--- ULTRA SMART AUTO KATA (ANTI LUAOBFUSCATOR V1 BUILD)
--- =========================================================
-
 if game:IsLoaded() == false then
     game.Loaded:Wait()
 end
@@ -237,11 +233,11 @@ end
 -- =========================
 local Window = Rayfield:CreateWindow({
     Name = "⚡ NAKA ULTRA AUTO KATA ⚡",
-    LoadingTitle = "NAKA AI Engine",
+    LoadingTitle = "NAKA Engine",
     LoadingSubtitle = "Ultra Smart Automation System",
     ConfigurationSaving = {
         Enabled = true,
-        FolderName = "NAKA-AI",
+        FolderName = "NAKA",
         FileName = "AutoKataConfig"
     },
     Discord = {
@@ -250,10 +246,11 @@ local Window = Rayfield:CreateWindow({
     KeySystem = false
 })
 
-Rayfield:LoadConfiguration()
+Rayfield:SetTheme("DarkBlue") -- set theme dulu
+Rayfield:LoadConfiguration()  -- baru load config
 
 Rayfield:Notify({
-    Title = "NAKA AI",
+    Title = "NAKA",
     Content = "GUI Loaded Successfully!",
     Duration = 4,
     Image = 4483362458
@@ -294,7 +291,7 @@ MainTab:CreateSlider({
     Increment = 5,
     CurrentValue = config.aggression,
     Callback = function(Value)
-        config.agression = Value
+    config.agression = Value
     end
 })
 
@@ -385,9 +382,9 @@ local function updateOpponentStatus()
             content = "🟢 Giliran Anda"
         else
             if opponentStreamWord and opponentStreamWord ~= "" then
-                content = "🟡 Opponent mengetik: " .. tostring(opponentStreamWord)
+                content = "🟡 Lawan mengetik: " .. tostring(opponentStreamWord)
             else
-                content = "🔴 Giliran Opponent"
+                content = "🔴 Giliran Lawan"
             end
         end
 
@@ -522,4 +519,4 @@ MatchUI.OnClientEvent:Connect(onMatchUI)
 BillboardUpdate.OnClientEvent:Connect(onBillboard)
 UsedWordWarn.OnClientEvent:Connect(onUsedWarn)
 
-print("ANTI LUAOBFUSCATOR BUILD LOADED SUCCESSFULLY")
+print("NAKA BUILD LOADED SUCCESSFULLY")
